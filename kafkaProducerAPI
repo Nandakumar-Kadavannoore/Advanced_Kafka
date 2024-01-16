@@ -1,0 +1,8 @@
+Properties properties = new Properties();
+properties.put("bootstrap.servers", "localhost:9092");
+properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+ProducerRecord<String, String> record = new ProducerRecord<>("my_topic", "key", "value");
+producer.send(record);
+producer.close();
