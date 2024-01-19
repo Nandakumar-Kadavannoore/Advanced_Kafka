@@ -1,0 +1,17 @@
+Properties streamsConfig = new Properties();
+streamsConfig.put(StreamsConfig.APPLICATION_ID_CONFIG, "live-score-dashboard");
+streamsConfig.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+
+StreamsBuilder builder = new StreamsBuilder();
+
+KStream<String, Event> eventsStream = builder.stream("sports-events-topic");
+
+KTable<String, Integer> liveScores = eventsStream
+    .filter((key, event) -> event.getType().equals("goal"))
+    .groupBy((key, event) -> event.getMatchId())
+    .count(Materialized.as("live-scores"));
+
+liveScores.toStream().to("live-scores-topic", Produced.with(Serdes.String(), Serdes.Integer()));
+
+KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfig);
+streams.start();
